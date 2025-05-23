@@ -1,30 +1,27 @@
 import streamlit as st
 import folium
-from geopy.geocoders import Nominatim
 from streamlit_folium import st_folium
 
-# Функція для отримання координат
-@st.cache_data
-def get_coordinates(place_name):
-    geolocator = Nominatim(user_agent="geo_locator")
-    location = geolocator.geocode(place_name)
-    if location:
-        return (location.latitude, location.longitude)
-    else:
-        return None
+# СТАБІЛЬНІ координати районів (щоб не викликати geopy і не створювати запити)
+district_coords = {
+    "Івано-Франківський район": (48.9226, 24.7103),
+    "Калуський район": (49.0141, 24.3734),
+    "Коломийський район": (48.5300, 25.0400),
+    "Надвірнянський район": (48.6330, 24.5697),
+}
 
 # Вступ
 st.title("Лабораторна робота 22: Folium + Streamlit")
 st.markdown("Це інтерактивна карта з районами Івано-Франківської області.")
 
-# Вибір районів та категорій
-districts = ["Івано-Франківський район", "Калуський район", "Коломийський район", "Надвірнянський район"]
+# Вибір районів
+districts = list(district_coords.keys())
 selected_districts = st.multiselect("Оберіть райони для відображення", districts, default=districts)
 
+# Категорії та кольори
 categories = ["A", "B", "C", "D"]
 colors = {"A": "red", "B": "green", "C": "pink", "D": "blue"}
 
-# Випадковий вибір категорії для району (або можна реалізувати ручний вибір)
 import random
 district_categories = {district: random.choice(categories) for district in selected_districts}
 
@@ -37,7 +34,7 @@ folium.LayerControl().add_to(m)
 
 # Додавання маркерів
 for district, cat in district_categories.items():
-    coords = get_coordinates(district)
+    coords = district_coords.get(district)
     if coords:
         folium.Marker(
             location=coords,
